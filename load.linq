@@ -7,7 +7,6 @@
 
 var client = new ThreadLocal<RestClient>(()=>new RestClient("http://localhost:8000"));
 var request = new RestRequest("/",Method.GET);
-request.Timeout=100;
 var load = Enumerable
 	.Range(1, 10000)
 	.AsParallel()
@@ -16,5 +15,11 @@ var load = Enumerable
 ;
 
 load.Last().Content.Dump();
+
+load.GroupBy(r => r.Content).Select(g => new
+{
+	Port=g.Key,
+	Count=g.Count()
+}).Distinct().Dump();
 
 $"Errors: {load.Where(r => r.StatusCode != HttpStatusCode.OK).Count()}".Dump();
